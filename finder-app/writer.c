@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 	char* filename;
 	char* writestr;
 
-	//syslog(LOG_USER, "Writing utility running.");
+	syslog(LOG_USER, "Writing utility running.");
 
 	if (argc != 3)
 	{
@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	writestr = argv[2];
 	printf("Writing %s to file %s\n", writestr, filename);
 
-	//syslog(LOG_DEBUG, "Writing %s to file %s", writestr, filename);
+	syslog(LOG_DEBUG, "Writing %s to file %s", writestr, filename);
 	fptr = fopen(filename, "w+");
 	fprintf(fptr, "%s", writestr);
 
