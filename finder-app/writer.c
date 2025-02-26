@@ -16,15 +16,16 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	filename = argv[1];
+        writestr = argv[2];
+
 	fptr = fopen(filename, "w");
 
 	if (fptr == NULL)
 	{
 		syslog(LOG_ERR, "Error opening file.");
+		return 1;
 	}
-
-	filename = argv[1];
-	writestr = argv[2];
 
 	syslog(LOG_DEBUG, "Writing %s to file %s", writestr, filename);
 	fprintf(fptr, "%s", writestr);

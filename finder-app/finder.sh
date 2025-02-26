@@ -1,22 +1,25 @@
 #!/bin/sh
 
-filesdir=$1
-searchstr=$2
+set -e
+set -u
 
-if [ "$#" -ne 2 ]
+if [ $# -lt 2 ]
 then
-	echo "Script takes two arguments"
-	exit 1
+    echo "Error, script takes two arguments."
+    exit 1
 fi
 
-if [ ! -d "$filesdir" ]
+FILESDIR=$1
+SEARCHSTR=$2
+
+
+if [ ! -d $1 ]
 then
-	echo "$filesdir is not a directory"
-	exit 1
+    echo "Error, ${FILESDIR} invalid filename."
+    exit 1
 fi
 
-files=$(find "$filesdir" -type f)
-X=$(find "$filesdir" -type f | wc -l)
-Y=$(cat $files | grep -c "$searchstr")
+FILENUM=`grep -ril ${SEARCHSTR} ${FILESDIR} | wc -l`
+MATCHNUM=`grep -ri ${SEARCHSTR} ${FILESDIR} | wc -l`
 
-echo "The number of files are $X and the number of matching lines are $Y"
+echo "The number of files are ${FILENUM} and the number of matching lines are ${MATCHNUM}"
