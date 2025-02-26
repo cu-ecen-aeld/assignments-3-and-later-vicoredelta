@@ -9,6 +9,7 @@
 */
 bool do_system(const char *cmd)
 {
+<<<<<<< HEAD
     int rc = system(cmd);
 
     if (rc == 0)
@@ -19,6 +20,17 @@ bool do_system(const char *cmd)
     {
         return false;
     }
+=======
+
+/*
+ * TODO  add your code here
+ *  Call the system() function with the command set in the cmd
+ *   and return a boolean true if the system() call completed with success
+ *   or false() if it returned a failure
+*/
+
+    return true;
+>>>>>>> assignments-base/assignment3-part-1
 }
 
 /**
@@ -41,8 +53,11 @@ bool do_exec(int count, ...)
     va_start(args, count);
     char * command[count+1];
     int i;
+<<<<<<< HEAD
     int rc;
     pid_t p
+=======
+>>>>>>> assignments-base/assignment3-part-1
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
@@ -53,6 +68,10 @@ bool do_exec(int count, ...)
     command[count] = command[count];
 
 /*
+<<<<<<< HEAD
+=======
+ * TODO:
+>>>>>>> assignments-base/assignment3-part-1
  *   Execute a system command by calling fork, execv(),
  *   and wait instead of system (see LSP page 161).
  *   Use the command[0] as the full path to the command to execute
@@ -60,6 +79,7 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+<<<<<<< HEAD
     p = fork();
 
     if (p < 0)
@@ -82,6 +102,11 @@ bool do_exec(int count, ...)
     }
 
     va_end(args);
+=======
+
+    va_end(args);
+
+>>>>>>> assignments-base/assignment3-part-1
     return true;
 }
 
