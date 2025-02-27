@@ -9,7 +9,6 @@
 */
 bool do_system(const char *cmd)
 {
-<<<<<<< HEAD
     int rc = system(cmd);
 
     if (rc == 0)
@@ -20,17 +19,8 @@ bool do_system(const char *cmd)
     {
         return false;
     }
-=======
-
-/*
- * TODO  add your code here
- *  Call the system() function with the command set in the cmd
- *   and return a boolean true if the system() call completed with success
- *   or false() if it returned a failure
-*/
 
     return true;
->>>>>>> assignments-base/assignment3-part-1
 }
 
 /**
@@ -53,25 +43,17 @@ bool do_exec(int count, ...)
     va_start(args, count);
     char * command[count+1];
     int i;
-<<<<<<< HEAD
-    int rc;
-    pid_t p
-=======
->>>>>>> assignments-base/assignment3-part-1
+    int status;
+    pid_t p;
+    char * argv[count];
+
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
     }
     command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
 
 /*
-<<<<<<< HEAD
-=======
- * TODO:
->>>>>>> assignments-base/assignment3-part-1
  *   Execute a system command by calling fork, execv(),
  *   and wait instead of system (see LSP page 161).
  *   Use the command[0] as the full path to the command to execute
@@ -79,7 +61,6 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-<<<<<<< HEAD
     p = fork();
 
     if (p < 0)
@@ -87,27 +68,36 @@ bool do_exec(int count, ...)
         return false;
     }
 
-    if (p == getpid())
+    if (p == 0)
     {
-        execv(command[0], &command[1]);
-        // execv only returns if an error has occured
+        // return false if using relative path
+        if (command[count-1][0] != '/')
+        {
+            return false;
+        }
+
+        for (i = 0; i<count-1; i++)
+        {
+            argv[i] = command[i+1];
+        }
+
+        argv[count-1] = NULL;
+        execv(command[0], argv);
+        // execv only return if an error has occured
         return false;
     }
-
-    rc = waitpid(p, NULL, WCONTINUED);
-
-    if (rc != 0)
+    else
     {
-        return false;
+        waitpid(p, &status, 0);
+
+        if (status != 0)
+        {
+            return false;
+        }
+
+        va_end(args);
+        return true;
     }
-
-    va_end(args);
-=======
-
-    va_end(args);
-
->>>>>>> assignments-base/assignment3-part-1
-    return true;
 }
 
 /**
@@ -121,25 +111,68 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     va_start(args, count);
     char * command[count+1];
     int i;
+    int status;
+    pid_t p;
+    char * argv[count];
+
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
     }
     command[count] = NULL;
-    // this line is to avoid a compile warning before your implementation is complete
-    // and may be removed
-    command[count] = command[count];
 
 
 /*
- * TODO
  *   Call execv, but first using https://stackoverflow.com/a/13784315/1446624 as a refernce,
  *   redirect standard out to a file specified by outputfile.
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
 
-    va_end(args);
+    p = fork();
 
-    return true;
+    if (p < 0)
+    {
+        return false;
+    }
+
+    if (p == 0)
+    {
+        // return false if using relative path
+        if (command[count-1][0] != '/')
+        {
+            return false;
+        }
+
+        if (dup2(fd, 1) < 0)
+        {
+            return false;
+        }
+
+        close(fd);
+
+        for (i = 0; i<count-1; i++)
+        {
+            argv[i] = command[i+1];
+        }
+
+        argv[count-1] = NULL;
+        execvp(command[0], argv);
+        // execvp only return if an error has occured
+        return false;
+    }
+    else
+    {
+        waitpid(p, &status, 0);
+
+        if (status != 0)
+        {
+            return false;
+        }
+
+        va_end(args);
+        close(fd);
+        return true;
+    }
 }
