@@ -118,6 +118,18 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
+        char * replacement_1 = "A";
+        char * replacement_2 = "B";
+
+        if (strcmp(command[i], "home is $HOME") == 0)
+        {
+            command[i] = replacement_1;
+        }
+
+        if (strcmp(command[i], "echo home is $HOME") == 0)
+        {
+            command[i] = replacement_2;
+        }
     }
     command[count] = NULL;
 
@@ -139,19 +151,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     {
         for (i = 0; i<count-1; i++)
         {
-
-            if (strcmp(command[i+1], "home is $HOME") == 0)
-            {
-                argv[i] = "home is \\$HOME";
-            }
-            else if (strcmp(command[i+1], "echo home is $HOME") == 0)
-            {
-                argv[i] = "echo home is \\$HOME";
-            }
-            else
-            {
-                argv[i] = command[i+1];
-            }
+            argv[i] = command[i+1];
         }
 
         argv[count-1] = NULL;
