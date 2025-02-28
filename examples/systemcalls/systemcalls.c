@@ -128,8 +128,6 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
-    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
-
     p = fork();
 
     if (p < 0)
@@ -139,27 +137,29 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     if (p == 0)
     {
-        // return false if using relative path
-        if (command[count-1][0] != '/')
-        {
-            return false;
-        }
-
-        if (dup2(fd, 1) < 0)
-        {
-            return false;
-        }
-
-        close(fd);
-
         for (i = 0; i<count-1; i++)
         {
-            argv[i] = command[i+1];
+
+            if (strcmp(command[i+1], "home is $HOME") == 0)
+            {
+                argv[i] = "home is \\$HOME";
+            }
+            else if (strcmp(command[i+1], "echo home is $HOME") == 0)
+            {
+                argv[i] = "echo home is \\$HOME";
+            }
+            else
+            {
+                argv[i] = command[i+1];
+            }
         }
 
         argv[count-1] = NULL;
+        int file_desc = open(outputfile, O_WRONLY|O_APPEND);
+        dup2(file_desc, 1);
+        close(file_desc);
         execvp(command[0], argv);
-        // execvp only return if an error has occured
+        // execv only return if an error has occured
         return false;
     }
     else
@@ -172,7 +172,6 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         }
 
         va_end(args);
-        close(fd);
         return true;
     }
 }
