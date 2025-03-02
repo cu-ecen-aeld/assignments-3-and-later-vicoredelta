@@ -45,7 +45,6 @@ bool do_exec(int count, ...)
     int i;
     int status;
     pid_t p;
-    char * argv[count];
 
     for(i=0; i<count; i++)
     {
@@ -70,21 +69,9 @@ bool do_exec(int count, ...)
 
     if (p == 0)
     {
-        // return false if using relative path
-        if (command[count-1][0] != '/')
-        {
-            return false;
-        }
-
-        for (i = 0; i<count-1; i++)
-        {
-            argv[i] = command[i+1];
-        }
-
-        argv[count-1] = NULL;
-        execv(command[0], argv);
+        execv(command[0], &command[0]);
         // execv only return if an error has occured
-        return false;
+        exit(EXIT_FAILURE);
     }
     else
     {
@@ -113,26 +100,12 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     int i;
     int status;
     pid_t p;
-    char * argv[count];
 
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
-        char * replacement_1 = "A";
-        char * replacement_2 = "B";
-
-        if (strcmp(command[i], "home is $HOME") == 0)
-        {
-            command[i] = replacement_1;
-        }
-
-        if (strcmp(command[i], "echo home is $HOME") == 0)
-        {
-            command[i] = replacement_2;
-        }
     }
     command[count] = NULL;
-
 
 /*
  *   Call execv, but first using https://stackoverflow.com/a/13784315/1446624 as a refernce,
@@ -149,18 +122,12 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
     if (p == 0)
     {
-        for (i = 0; i<count-1; i++)
-        {
-            argv[i] = command[i+1];
-        }
-
-        argv[count-1] = NULL;
-        int file_desc = open(outputfile, O_WRONLY|O_APPEND);
+        int file_desc = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
         dup2(file_desc, 1);
         close(file_desc);
-        execvp(command[0], argv);
+        execv(command[0], &command[0]);
         // execv only return if an error has occured
-        return false;
+        exit(EXIT_FAILURE);
     }
     else
     {
