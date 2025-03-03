@@ -12,6 +12,7 @@ BUSYBOX_VERSION=1_33_stable
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=aarch64-none-linux-gnu-
+SYSROOT=/home/emil/x-tools/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/../aarch64-none-linux-gnu/libc
 
 export PATH=${PATH}:/home/emil/x-tools/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin
 
@@ -67,24 +68,29 @@ git clone https://github.com/mirror/busybox
     # Configure busybox
     make distclean
     make defconfig
+    make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
 else
     cd busybox
 fi
 
 # Make and install busybox
-make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE}
-make CONFIG_PREFIX=${OUTDIR}/rootfs CROSS_COMPILE=${CROSS_COMPILE} install
+make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} install
 
 echo "Library dependencies"
 #${CROSS_COMPILE}readelf -a /bin/busybox | grep "program interpreter"
 #${CROSS_COMPILE}readelf -a /bin/busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
+sudo cp ${SYSROOT}/lib/ld-linux-aarch64.so.1 lib
+sudo cp ${SYSROOT}/lib64/libm.so.6 lib64
+sudo cp ${SYSROOT}/lib64/libresolv.so.2 lib64
+sudo cp ${SYSROOT}/lib64/libc.so.6 lib64
+
 
 # Make device nodes
-cd ${OUTDIR}/rootfs/
+cd ${OUTDIR}/rootfs
 sudo mknod -m 666 dev/null c 1 3
-sudo mknod -m 600 dev/console c 5 1
+sudo mknod -m 666 dev/console c 5 1
 
 # Clean and build the writer utility
 cd ${FINDER_APP_DIR}
@@ -95,10 +101,10 @@ make CROSS_COMPILE=${CROSS_COMPILE}
 # on the target rootfs
 cd ${FINDER_APP_DIR}
 cp writer finder.sh conf/username.txt conf/assignment.txt finder-test.sh ${OUTDIR}/rootfs/home/
+cp -r conf/ ${OUTDIR}/rootfs/home/
 
 # Chown the root directory
-cd ${OUTDIR}/rootfs/
-sudo chown -R root:root *
+sudo chown -R root:root * ${OUTDIR}/rootfs/
 
 # Create initramfs.cpio.gz
 cd ${OUTDIR}/rootfs/
