@@ -11,5 +11,8 @@ else
 	gcc writer.c -o writer
 endif
 
+all: writer.c
+	aarch64-none-linux-gnu-gcc writer.c -o writer
+
 clean:
 	rm -f *.o *.out writer
