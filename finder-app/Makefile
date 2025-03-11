@@ -12,7 +12,7 @@ else
 endif
 
 all: writer.c
-	aarch64-none-linux-gnu-gcc writer.c -o writer
+	aarch64-buildroot-linux-gnu-gcc writer.c -o writer
 
 clean:
 	rm -f *.o *.out writer
